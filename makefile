@@ -8,7 +8,7 @@ threads: threads.cpp
 main: main.cpp
 	g++ -c main.cpp -o ./bin/main.o
 
-link: ./bin/threads.o
+link: ./bin/threads.o ./bin/main.o
 	g++ -g ./bin/threads.o ./bin/main.o -o ./bin/sched_test
 
 clean:
