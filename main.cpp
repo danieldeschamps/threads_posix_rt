@@ -18,14 +18,20 @@ int64_t test_wrapper(const int int_param_testnbr,
 	const size_t uint_param_thread_count)
 {
 	std::cout << "Lauching sub test #" << int_param_testnbr << std::endl;
+
 	auto begin = std::chrono::high_resolution_clock::now();
+
 	create_threads(int_param_policy, e_param_method, uint_param_thread_count);
+
 	auto end = std::chrono::high_resolution_clock::now();
 	auto elapsed = std::chrono::duration_cast<std::chrono::nanoseconds>(end - begin);
+
 	std::cout << "Finished sub test #" << int_param_testnbr << " [" << elapsed.count() * 1e-9 << " s]" << std::endl;
 	std::cout << sz_line << std::endl;
+
 	return elapsed.count();
 }
+
 // main function should be launched according to makefile directives
 // make file will link it to 'sched_test' program
 // root permision is required to set real time scheduling (RR and FIFO)
@@ -79,26 +85,37 @@ int main(int argc, char *argv[]) {
 
 	auto begin = std::chrono::high_resolution_clock::now();
 
-	std::array<int64_t,9> array_testpool_ns = { 0 };
-	int int_test = 0;
-	array_testpool_ns[int_test++] = test_wrapper(int_test+1, SCHED_OTHER, E_PARALLEL, int_threads);
-	array_testpool_ns[int_test++] = test_wrapper(int_test+1, SCHED_FIFO, E_PARALLEL, int_threads);
-	array_testpool_ns[int_test++] = test_wrapper(int_test+1, SCHED_FIFO, E_ASCENDING, int_threads);
-	array_testpool_ns[int_test++] = test_wrapper(int_test+1, SCHED_FIFO, E_DESCENDING, int_threads);
-	array_testpool_ns[int_test++] = test_wrapper(int_test+1, SCHED_FIFO, E_ODDS, int_threads);
-	array_testpool_ns[int_test++] = test_wrapper(int_test+1, SCHED_RR, E_PARALLEL, int_threads);
-	array_testpool_ns[int_test++] = test_wrapper(int_test+1, SCHED_RR, E_ASCENDING, int_threads);
-	array_testpool_ns[int_test++] = test_wrapper(int_test+1, SCHED_RR, E_DESCENDING, int_threads);
-	array_testpool_ns[int_test++] = test_wrapper(int_test+1, SCHED_RR, E_ODDS, int_threads);
+	struct {
+		int					i_sched;
+		e_processing_method	e_method;
+		int64_t				u_benchmark_ns;
+	} test_table [] = {	{SCHED_OTHER,	E_PARALLEL,		0},
+						{SCHED_FIFO,	E_PARALLEL,		0},
+						{SCHED_FIFO,	E_ASCENDING,	0},
+						{SCHED_FIFO,	E_DESCENDING,	0},
+						{SCHED_FIFO,	E_ODDS,			0},
+						{SCHED_RR,		E_PARALLEL,		0},
+						{SCHED_RR,		E_ASCENDING,	0},
+						{SCHED_RR,		E_DESCENDING,	0},
+						{SCHED_RR,		E_ODDS,			0},
+					};
 
-	
+	int int_test = 0;
+	for(auto& test_case: test_table)
+		test_case.u_benchmark_ns = test_wrapper((int_test++)+1, test_case.i_sched, test_case.e_method, int_threads);
+
 	auto end = std::chrono::high_resolution_clock::now();
 	auto elapsed = std::chrono::duration_cast<std::chrono::nanoseconds>(end - begin);
+
 	std::cout << "Main program finished with [" << elapsed.count() * 1E-9 << "] seconds elapsed" << std::endl;
 	std::cout << std::endl;
+
 	std::cout << "Sub tests summary:"  << std::endl;
-	for (int_test=0; int_test < 9; int_test++)
-		std::cout << "Sub test #" << int_test+1 << " [" << array_testpool_ns[int_test] * 1e-9 << " s] seconds elapsed" << std::endl;
+
+	int_test = 0;
+	for(auto& test_case: test_table)
+		std::cout << "Sub test #" << (int_test++)+1 << " [" << test_case.u_benchmark_ns * 1e-9 << " s] seconds elapsed" << std::endl;
+
 	std::cout << std::endl;
 	std::cout << "Statistically CFS (Sub test #1) has an overall better performance than both RT policies (FIFO and RR)." << std::endl;
 	std::cout << "RT determinism comes with a small extra cost as it does not optimize scheduling fairness according to load." << std::endl;

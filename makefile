@@ -1,35 +1,51 @@
 # author: daniel.deschampsgmail.com
 
-all: threads main link
+# leading '-' ignores errors and continues
+# leading '@' turns echo off
 
-threads: threads.cpp
-	g++ -c threads.cpp -o ./bin/threads.o
+# % is the implicit rule
+# $@ is the target
+# $< is the first prerequisite
+# $^ are all the prerequisites
 
-main: main.cpp
-	g++ -c main.cpp -o ./bin/main.o
+CC=g++
+CFLAGS=-Wall
+OUT_DIR=./bin
+MODULES= main threads
+EXEC_FILE=sched_test
 
-link: ./bin/threads.o ./bin/main.o
-	g++ -g ./bin/threads.o ./bin/main.o -o ./bin/sched_test
+#DEPS=threads.h
+OBJS=$(patsubst %,%.o,$(MODULES))
+OUT_OBJS=$(patsubst %,$(OUT_DIR)/%,$(OBJS))
+OUT_EXEC_FILE=$(OUT_DIR)/$(EXEC_FILE)
+
+all: startup $(OUT_OBJS) $(OUT_EXEC_FILE)
+
+startup:
+	@-if [ ! -d "$(OUT_DIR)" ]; then mkdir $(OUT_DIR); fi
+
+$(OUT_DIR)/%.o: %.cpp
+	$(CC) -c $(CFLAGS) $< -o $@
+
+$(OUT_EXEC_FILE): $(OUT_OBJS)
+	$(CC) -g $^ -o $(OUT_EXEC_FILE)
 
 clean:
-# leading '-' ignores errors and continues
-	-rm ./bin/*.o
-	-rm ./bin/sched_test
+	@-if [ -d "$(OUT_DIR)" ]; then $(RM) $(OUT_DIR) -r; fi
+	
 
 pre_run: all
-# @ turns echo off
-	@cp ./bin/sched_test ./
-	@-chmod a+rwx ./sched_test
-	@-chmod a+rwx ./bin
-	@-chmod a+rwx ./
 	@-echo --------------------------------------------------------------------------------------------------------
 	@-uname -v | grep 'PREEMPT_RT'
+	@-echo --------------------------------------------------------------------------------------------------------
 	@-lscpu | egrep 'Model name|Socket|Thread|NUMA|CPU\(s\)'
+	@-echo --------------------------------------------------------------------------------------------------------
+	@-sysctl kernel.sched_rr_timeslice_ms
 
 run: pre_run
-	@-sudo ./sched_test $(threads)
-	@rm ./sched_test
+	@-sudo $(OUT_EXEC_FILE) $(threads)
 
-run-rr: pre_run
-	@-sudo chrt -rr 10 ./sched_test $(threads)
-	@rm ./sched_test
+run-rr:	pre_run
+	@-sudo chrt -rr 10 $(OUT_EXEC_FILE) $(threads)
+
+-include $(DEPS)

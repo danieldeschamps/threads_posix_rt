@@ -33,7 +33,7 @@ static pthread_mutex_t mutex_cout; // mutex to protect concurrent std::couts (av
 
 // helper function returns a formatted string containing calling thread information
 static std::string get_sched_info_str() {
-	int int_ret, int_policy, int_prio, int_minprio, int_maxprio;
+	int int_ret, int_policy, int_minprio, int_maxprio;
 	unsigned int uint_timeslice_ms;
 	pthread_t o_thread_handle;
 	sched_param o_sched_param;
@@ -66,10 +66,8 @@ static std::string get_sched_info_str() {
 
 // standard worker thread routine. should receive a thread_information_t* as argument
 static void* thread_routine(void* arg) {
-	int int_ret;
 	thread_information_t * po_thread = reinterpret_cast<thread_information_t*>(arg);
 	std::ostringstream oss_threadinfo_custom, oss_threadinfo_sys, oss_threadbenchmark, oss_start, oss_end;
-	timespec o_timespec;
 	
 	auto begin = std::chrono::high_resolution_clock::now();
 
@@ -134,7 +132,7 @@ void create_threads(const int int_param_policy, // from <sched.h>: SCHED_OTHER, 
 // handle thread attributes
 	pthread_attr_t o_pthread_attr;
 	sched_param o_sched_param; // contains only the thread priority
-	int int_policy = -1, int_minprio = -1, int_maxprio = -1;
+	int int_minprio = -1;
 
 	// initialized with default attributes to be used with pthread_create. 
 	// these attributes should be the same as calling pthread_create with attributes pointer
@@ -153,7 +151,6 @@ void create_threads(const int int_param_policy, // from <sched.h>: SCHED_OTHER, 
 	int_ret = pthread_attr_setschedpolicy(&o_pthread_attr, int_param_policy); 
 	cout_sys_error(int_ret,"pthread_attr_setschedpolicy");
 
-	int_maxprio = sched_get_priority_max(int_param_policy);
 	int_minprio = sched_get_priority_min(int_param_policy);
 	
 // create threads
