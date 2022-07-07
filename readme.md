@@ -26,9 +26,9 @@ $sudo chrt -rr 10 ./sched_test <n threads>
 
 # Description
 This program will test 3 scheduling policies within Linux system:
-CFS  - Completely Fair Scheduling (default): shares cpu power among all threads according to niceness
-FIFO - First In First Out (RT): Priority is enforced and cpu is shared by order
-RR   - Round Robin (RT): Priority is enforced and cpu is shared by time slices
+- CFS  - Completely Fair Scheduling (default): shares cpu power among all threads according to niceness
+- FIFO - First In First Out (Real Ttime): Priority is enforced and cpu is shared by order
+- RR   - Round Robin (Real Time): Priority is enforced and cpu is shared by time slices
 
 It is expected that:
 - CFS  has only one priority level and it will share the CPU time among all threads which will run in parallel
