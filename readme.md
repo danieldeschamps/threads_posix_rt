@@ -36,8 +36,11 @@ It is expected that:
 - RR   has multiple prio levels. High prio will preempt and run first. Same prios will share time slices (100ms by default)
 
 The program will launch a thread pool of <n> threads at the same time, with a dummy work to be done (never sleeping, yeld or blocking)
+
 CPU affinity will be set to use only one core in order to pipe line the scheduler. You can use htop utility to check cpu usage
-Threads will contain a thread id from 0 to n-1
+
+Threads will contain a thread id from 0 to <n-1>
+
 A total of 9 sub tests will be launched by mixing scheduling policies and priority schemes
 
 Observe that 4 priority schemes are used:
