@@ -1,4 +1,5 @@
 # Author: daniel.deschamps@gmail.com
+This is a concept test using LINUX PREEMPT_RT kernel patch showing the real time behavior of threads, using pthread library.
 
 # Build the project
 $ make
