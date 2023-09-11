@@ -13,7 +13,7 @@ $ make run
 # Build and run by choosing main thread to start with RR schduling and prio=10
 $ make run-rr
 
-# Select the number of worker threads. default is 8 in case ommited
+# Select the number of worker threads. Default is 8 in case ommited
 $ make run threads=4
 
 $ make run-rr threads=16
@@ -36,11 +36,11 @@ It is expected that:
 - FIFO has multiple prio levels. High prio will preempt and run first. Same prios will execute in the order they started
 - RR   has multiple prio levels. High prio will preempt and run first. Same prios will share time slices (100ms by default)
 
-The program will launch a thread pool of <n> threads at the same time, with a dummy work to be done (never sleeping, yeld or blocking)
+The program will launch a thread pool of (n) threads at the same time, with a dummy work to be done (never sleeping, yeld or blocking)
 
 CPU affinity will be set to use only one core in order to pipe line the scheduler. You can use htop utility to check cpu usage
 
-Threads will contain a thread id from 0 to <n-1>
+Threads will contain a thread id from 0 to (n-1)
 
 A total of 9 sub tests will be launched by mixing scheduling policies and priority schemes
 
